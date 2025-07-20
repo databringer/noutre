@@ -1,5 +1,5 @@
 import streamlit as st
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 import numpy as np
 import os
 from moviepy.editor import ImageSequenceClip
@@ -28,8 +28,8 @@ def calc_hints(grid):
         hints.append(hint or [0])
     return hints
 
-# 画像をPillowで1フレームずつ生成
-def generate_frames(grid, cell_size=50, duration_sec=10, pause_sec=3):
+# アニメーション生成
+def generate_frames(grid, cell_size=32, duration_sec=10, pause_sec=3):
     rows, cols = grid.shape
     total_cells = np.sum(grid)
     frame_rate = 30
@@ -42,7 +42,6 @@ def generate_frames(grid, cell_size=50, duration_sec=10, pause_sec=3):
     for f in range(solve_frames):
         img = Image.new("RGB", (cols * cell_size, rows * cell_size), "white")
         draw = ImageDraw.Draw(img)
-        # グリッドを描く
         for i in range(rows):
             for j in range(cols):
                 x1, y1 = j * cell_size, i * cell_size
@@ -53,21 +52,25 @@ def generate_frames(grid, cell_size=50, duration_sec=10, pause_sec=3):
         frames.append(img)
         step += cells_per_frame
 
-    # 完成後の静止フレーム
     for _ in range(pause_frames):
         frames.append(frames[-1])
-
     return frames
 
 if uploaded_file:
     os.makedirs("output", exist_ok=True)
 
+    # ✅ 30×30に変換
     image = Image.open(uploaded_file).convert("L")
-    img_array = np.array(image.resize((10, 10)))
+    img_array = np.array(image.resize((30, 30)))
     binary = (img_array < 128).astype(int)
 
-    st.write("🧩 ピクロスグリッド（10×10）:")
-    st.image(binary * 255, width=200)
+    # ✅ 拡大表示（960x960px相当）
+    grid_display = (binary * 255).astype(np.uint8)
+    grid_image = Image.fromarray(grid_display)
+    grid_image = grid_image.resize((960, 960), resample=Image.NEAREST)
+
+    st.write("🧩 ピクロスグリッド（30×30）:")
+    st.image(grid_image, caption="拡大表示されたピクロスグリッド", use_column_width=False)
 
     row_hints = calc_hints(binary)
     col_hints = calc_hints(binary.T)
