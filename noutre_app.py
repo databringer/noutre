@@ -70,7 +70,7 @@ if uploaded_file:
     grid_image = grid_image.resize((960, 960), resample=Image.NEAREST)
 
     st.write("🧩 ピクロスグリッド（30×30）:")
-    st.image(grid_image, caption="拡大表示されたピクロスグリッド", use_column_width=False)
+    st.image(grid_image, caption="拡大表示されたピクロスグリッド", use_container_width=False)
 
     row_hints = calc_hints(binary)
     col_hints = calc_hints(binary.T)
