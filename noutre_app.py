@@ -83,10 +83,31 @@ if uploaded_file:
     st.write("🧩 ピクロスグリッド（30×30／3色）:")
     st.image(grid_image, caption="白＝空白、グレー＝中間、黒＝濃い", use_container_width=False)
 
-    row_hints = calc_hints(quantized, target_value=1)
-    col_hints = calc_hints(quantized.T, target_value=1)
-    st.write("📌 行ヒント（グレー）:", row_hints)
-    st.write("📌 列ヒント（グレー）:", col_hints)
+# グレーと黒それぞれのヒントを取得
+row_hints_gray = calc_hints(quantized, target_value=1)
+col_hints_gray = calc_hints(quantized.T, target_value=1)
+row_hints_black = calc_hints(quantized, target_value=2)
+col_hints_black = calc_hints(quantized.T, target_value=2)
+
+# 並列表示
+st.write("📌 行・列ヒント（グレー / 黒）")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("#### 行ヒント")
+    for i in range(len(row_hints_gray)):
+        gray = row_hints_gray[i]
+        black = row_hints_black[i]
+        st.markdown(f"行 {i}: <span style='color:#888'>G{gray}</span> / <span style='color:#000'>B{black}</span>", unsafe_allow_html=True)
+
+with col2:
+    st.markdown("#### 列ヒント")
+    for i in range(len(col_hints_gray)):
+        gray = col_hints_gray[i]
+        black = col_hints_black[i]
+        st.markdown(f"列 {i}: <span style='color:#888'>G{gray}</span> / <span style='color:#000'>B{black}</span>", unsafe_allow_html=True)
+
 
     if st.button("③ ピクロス解答動画を生成（10秒）"):
         with st.spinner("🧠 動画生成中…"):
