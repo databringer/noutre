@@ -59,10 +59,13 @@ def generate_frames(grid, cell_size=32, duration_sec=10, pause_sec=3):
 if uploaded_file:
     os.makedirs("output", exist_ok=True)
 
-    # ✅ 30×30に変換
+    # ✅ 画像読み込み＆30×30に変換
     image = Image.open(uploaded_file).convert("L")
     img_array = np.array(image.resize((30, 30)))
-    binary = (img_array < 128).astype(int)
+
+    # ✅ スライダー追加：しきい値を調整可能に
+    threshold = st.slider("白黒変換のしきい値（暗いほど黒マス）", 0, 255, 128)
+    binary = (img_array < threshold).astype(int)
 
     # ✅ 拡大表示（960x960px相当）
     grid_display = (binary * 255).astype(np.uint8)
@@ -71,6 +74,7 @@ if uploaded_file:
 
     st.write("🧩 ピクロスグリッド（30×30）:")
     st.image(grid_image, caption="拡大表示されたピクロスグリッド", use_container_width=False)
+
 
     row_hints = calc_hints(binary)
     col_hints = calc_hints(binary.T)
